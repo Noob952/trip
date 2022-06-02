@@ -37,8 +37,12 @@ var vue = new Vue({
             _this.toasts=data.data;
         });
 
-        ajaxGet("/destinations/viewnumTop3",{destId:param.id},function (data) {
+        ajaxGet("/destinations/strategies/viewnumTop3",{destId:param.id},function (data) {
             _this.strategies=data.data;
+        })
+        ajaxGet("/travels/query",{destId:param.id},function (data) {
+            _this.page=data.data;
+            buildPage(vue.page.current,vue.page.pages,vue.doPage);
         })
     }
 

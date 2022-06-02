@@ -1,12 +1,10 @@
 package cn.wolfcode.trip.web.controller;
 
-import cn.wolfcode.trip.domain.Destination;
-import cn.wolfcode.trip.domain.Region;
-import cn.wolfcode.trip.domain.Strategy;
-import cn.wolfcode.trip.domain.StrategyCatalog;
+import cn.wolfcode.trip.domain.*;
 import cn.wolfcode.trip.service.IDestinationService;
 import cn.wolfcode.trip.service.IRegionService;
 import cn.wolfcode.trip.service.IStrategyService;
+import cn.wolfcode.trip.service.ITravelService;
 import cn.wolfcode.trip.util.JsonResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +25,9 @@ public class DestinationController {
 
     @Autowired
     private IStrategyService strategyService;
+
+    @Autowired
+    private ITravelService travelService;
 
     @GetMapping("hotRegion")
     public JsonResult hotRegion(){
@@ -50,9 +51,15 @@ public class DestinationController {
         List<StrategyCatalog> catalogs=destinationService.queryCatalogs(destId);
         return JsonResult.success(catalogs);
     }
-    @GetMapping("viewnumTop3")
-    public JsonResult viewnumTop3(Long destId){
+    @GetMapping("strategies/viewnumTop3")
+    public JsonResult viewnumTop3Strategy(Long destId){
         List<Strategy> strategies=strategyService.queryViewnumTop3(destId);
         return JsonResult.success(strategies);
+    }
+    @GetMapping("travels/viewnumTop3")
+    public JsonResult viewnumTop3Travel(Long destId){
+
+        List<Travel> travels=travelService.queryViewnumTop3(destId);
+        return JsonResult.success(travels);
     }
 }
