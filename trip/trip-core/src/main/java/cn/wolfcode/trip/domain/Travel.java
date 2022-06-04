@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.annotation.Transient;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
@@ -56,7 +55,7 @@ public class Travel extends BaseDomain {
 
     private Date lastUpdateTime; //最新更新时间内
 
-    private Integer ispublic=ISPUBLIC_NO; //是否发布
+    private Integer ispublic = ISPUBLIC_NO; //是否发布
 
     private Integer viewnum;  //点击/阅读数
 
@@ -73,35 +72,35 @@ public class Travel extends BaseDomain {
     @TableField(exist = false)
     private TravelContent content;  //游记内容
 
-    public String getStateDisplay(){
-        if (state ==STATE_NORMAL ){
+    public String getStateDisplay() {
+        if (state == STATE_NORMAL) {
             return "编辑中";
-        }else if(state ==STATE_WAITING ){
+        } else if (state == STATE_WAITING) {
             return "待发布";
-        }else if(state ==STATE_RELEASE ){
+        } else if (state == STATE_RELEASE) {
             return "已发布";
-        }else if(state ==STATE_REJECT ){
+        } else if (state == STATE_REJECT) {
             return "已拒绝";
         }
         return "";
     }
 
-    public String getPersonDisplay(){
-       if (person == 1){
-           return "一个人";
-       }else if (person == 2){
-           return "情侣/夫妻";
-       }else if (person == 3){
-           return "带孩子";
-       }else if (person == 4){
-           return "家庭出游";
-       }else if (person == 5){
-           return "和朋友";
-       }else if (person == 6){
-           return "和同学";
-       }else if (person == 7){
-           return "其它";
-       }
-       return "其它";
+    public String getPersonDisplay() {
+        if (person == 1) {
+            return "一个人";
+        } else if (person == 2) {
+            return "情侣/夫妻";
+        } else if (person == 3) {
+            return "带孩子";
+        } else if (person == 4) {
+            return "家庭出游";
+        } else if (person == 5) {
+            return "和朋友";
+        } else if (person == 6) {
+            return "和同学";
+        } else if (person == 7) {
+            return "其它";
+        }
+        return "其它";
     }
 }

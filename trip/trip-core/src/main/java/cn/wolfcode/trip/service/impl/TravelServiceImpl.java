@@ -1,8 +1,9 @@
 package cn.wolfcode.trip.service.impl;
 
+
 import cn.wolfcode.trip.domain.Travel;
 import cn.wolfcode.trip.domain.TravelContent;
-import cn.wolfcode.trip.exception.LogicException;
+import cn.wolfcode.trip.domain.UserInfo;
 import cn.wolfcode.trip.mapper.TravelContentMapper;
 import cn.wolfcode.trip.mapper.TravelMapper;
 import cn.wolfcode.trip.query.TravelCondition;
@@ -10,55 +11,67 @@ import cn.wolfcode.trip.query.TravelQuery;
 import cn.wolfcode.trip.service.ITravelService;
 import cn.wolfcode.trip.service.IUserInfoService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 游记服务接口实现
+ */
 @Service
 @Transactional
 public class TravelServiceImpl extends ServiceImpl<TravelMapper, Travel> implements ITravelService {
 
     @Autowired
-    private IUserInfoService userInfoService;
-
-    @Autowired
     private TravelContentMapper travelContentMapper;
 
+    @Autowired
+    private IUserInfoService userInfoService;
+
     @Override
-    public Page<Travel> queryPage(TravelQuery qo) {
-        QueryWrapper<Travel> queryWrapper = new QueryWrapper<>();
-        //添加分页查询条件
-        if (qo.getDayType() > 0) {  //查询参数有出行时间
-            TravelCondition condition = TravelCondition.DAY_MAP.get(qo.getDayType());
-            queryWrapper.ge("day", condition.getMin())
-                    .le("day", condition.getMax());
+    public IPage<Travel> queryPage(TravelQuery qo) {
+        IPage<Travel> page = new Page<>(qo.getCurrentPage(), qo.getPageSize());
+        QueryWrapper<Travel> wrapper = Wrappers.<Travel>query();
+        wrapper.eq(qo.getDestId() != null, "dest_id", qo.getDestId());
+
+
+        //出现天数
+        //dayType = 2----->new TravelCondition(4,7)
+        TravelCondition day = TravelCondition.DAY_MAP.get(qo.getDayType());
+        if (day != null) {
+            wrapper.ge("day", day.getMin()).le("day", day.getMax());
         }
-        if (qo.getConsumeType() > 1) {  //查询参数有出行时间
-            TravelCondition condition = TravelCondition.AVG_MAP.get(qo.getConsumeType());
-            queryWrapper.ge("avg_consume", condition.getMin())
-                    .le("avg_consume", condition.getMax());
+
+
+        //人均消费
+        TravelCondition avg = TravelCondition.AVG_MAP.get(qo.getConsumeType());
+        if (avg != null) {
+            wrapper.ge("avg_consume", avg.getMin()).le("avg_consume", avg.getMax());
         }
-        if (qo.getTravelTimeType() > 1) {  //月份
-            TravelCondition condition = TravelCondition.TIME_MAP.get(qo.getTravelTimeType());
-            queryWrapper.ge("DATE_FORMAT(travel_time,'%m')", condition.getMin())
-                    .le("DATE_FORMAT(travel_time,'%m')", condition.getMax());
+
+        //出行时间
+        TravelCondition time = TravelCondition.TIME_MAP.get(qo.getTravelTimeType());
+        if (time != null) {
+            wrapper.ge("DATE_FORMAT(travel_time,'%m')", time.getMin())
+                    .le("DATE_FORMAT(travel_time,'%m')", time.getMax());
         }
-        if (qo.getDestId()!=null&&qo.getDestId()>0){
-            queryWrapper.eq("dest_id",qo.getDestId());
-        }
-        queryWrapper.orderByDesc(qo.getOrderBy());
-        Page<Travel> page = new Page(qo.getCurrentPage(), qo.getPageSize());
-        page = super.page(page, queryWrapper);
-        List<Travel> records = page.getRecords();
-        for (Travel record : records) {
-            if (record.getAuthorId() != null) {
-                record.setAuthor(userInfoService.getById(record.getAuthorId()));
-            }
+
+        //排序
+        wrapper.orderByDesc(StringUtils.hasLength(qo.getOrderBy()), qo.getOrderBy());
+
+
+        super.page(page, wrapper);
+        for (Travel record : page.getRecords()) {
+            UserInfo user = userInfoService.getById(record.getAuthorId());
+            record.setAuthor(user);
         }
         return page;
     }
@@ -69,29 +82,54 @@ public class TravelServiceImpl extends ServiceImpl<TravelMapper, Travel> impleme
     }
 
     @Override
-    public void audit(Long id, Integer state) {
+    public void audit(Long id, int state) {
+        //1:满足审核条件
         Travel travel = super.getById(id);
-        //1 判断能否被审核
-        if (travel.getState() == null || travel.getState() != Travel.STATE_WAITING) {
-            throw new LogicException("当前单据状态不合法");
+        if (travel == null || travel.getState() != Travel.STATE_WAITING) {
+            throw new RuntimeException("参数异常");
         }
-        //2 记录相关信息：审核人 最后修改时间 状态修改 发布时间
-        travel.setAuthorId(1L);
-        travel.setLastUpdateTime(new Date());
-        travel.setReleaseTime(new Date());
-        travel.setState(state);
-        //3 生成流水记录
-        //4 继承消息通知
-        super.saveOrUpdate(travel);
+        //2:审核通过之后做什么
+        if (state == Travel.STATE_RELEASE) {
+            //1>状态改为审核通过
+            travel.setState(Travel.STATE_RELEASE);
+            //2>发布时间为：当前时间
+            travel.setReleaseTime(new Date());
+            //3>最后修改时间为：当前时间
+            travel.setLastUpdateTime(new Date());
+            //4>记录审核信息：  审核人， 审核时间， 审核状态， 审核备注， 审核记录id....
+        } else if (state == Travel.STATE_REJECT) {
+            //3:审核拒绝之后做什么
+            //1>状态改为审核拒绝
+            travel.setState(Travel.STATE_REJECT);
+            //2>发布时间为：改null
+            travel.setReleaseTime(null);
+            //3>最后修改时间为：当前时间
+            travel.setLastUpdateTime(new Date());
+            //4>记录审核信息：  审核人， 审核时间， 审核状态， 审核备注， 审核记录id....
+        } else {
+            throw new RuntimeException("参数异常");
+        }
+        super.updateById(travel);
     }
 
     @Override
     public List<Travel> queryViewnumTop3(Long destId) {
-        QueryWrapper<Travel> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("dest_id",destId)
+
+        QueryWrapper<Travel> wrapper = Wrappers.<Travel>query();
+        wrapper.eq("dest_id", destId)
                 .orderByDesc("viewnum")
                 .last("limit 3");
-
-        return super.list(queryWrapper);
+        return super.list(wrapper);
     }
+
+    @Override
+    public List<Travel> queryByDestId(Long destId) {
+        List<Travel> list = super.list(Wrappers.<Travel>query().eq("dest_id", destId));
+        for (Travel travel : list) {
+            travel.setAuthor(userInfoService.getById(travel.getAuthorId()));
+        }
+        return list;
+    }
+
+
 }

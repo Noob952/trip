@@ -16,7 +16,7 @@ public class TravelCondition {
     //出发时间travel_time
     public static final Map<Integer, TravelCondition> TIME_MAP = new HashMap<>();
 
-    static{
+    static {
         DAY_MAP.put(1, new TravelCondition(0, 3));
         DAY_MAP.put(2, new TravelCondition(4, 7));
         DAY_MAP.put(3, new TravelCondition(8, 14));
@@ -38,7 +38,8 @@ public class TravelCondition {
 
     private int min;
     private int max;
-    public TravelCondition(int min, int max){
+
+    public TravelCondition(int min, int max) {
         this.min = min;
         this.max = max;
     }

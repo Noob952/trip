@@ -5,11 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
-* 游记查询参数封装对象
-*/
+ * 游记查询参数封装对象
+ */
 @Setter
 @Getter
-public class TravelQuery extends  QueryObject{
+public class TravelQuery extends QueryObject {
 
     private Long destId;
 
@@ -18,9 +18,6 @@ public class TravelQuery extends  QueryObject{
     private int consumeType = -1;  //人均消费
 
     private String orderBy = "create_time";
-
-
-
 
 
 }

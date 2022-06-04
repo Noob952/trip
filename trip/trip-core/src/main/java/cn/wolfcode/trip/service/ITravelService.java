@@ -3,37 +3,53 @@ package cn.wolfcode.trip.service;
 import cn.wolfcode.trip.domain.Travel;
 import cn.wolfcode.trip.domain.TravelContent;
 import cn.wolfcode.trip.query.TravelQuery;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
+
+/**
+ * 游记服务接口
+ */
 public interface ITravelService extends IService<Travel> {
     /**
-     * 游记的分页查询
+     * 分页
+     *
      * @param qo
      * @return
      */
-    Page<Travel> queryPage(TravelQuery qo);
+    IPage<Travel> queryPage(TravelQuery qo);
 
     /**
-     * 根据id查询游记内容
+     * 查内容
+     *
      * @param id
      * @return
      */
     TravelContent getContentById(Long id);
 
     /**
-     * 审核处理操作
-     * @param id 游记id
-     * @param state 2审核通过，3审核拒绝
+     * 审核
+     *
+     * @param id
+     * @param state
      */
-    void audit(Long id, Integer state);
+    void audit(Long id, int state);
 
     /**
-     * 根据目的地查询游记排名前三的数据
+     * 指定目的地下点击量前3
+     *
      * @param destId
      * @return
      */
     List<Travel> queryViewnumTop3(Long destId);
+
+    /**
+     * 查询目的地下游记
+     *
+     * @param destId
+     * @return
+     */
+    List<Travel> queryByDestId(Long destId);
 }
