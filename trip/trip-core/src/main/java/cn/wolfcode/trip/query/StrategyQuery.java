@@ -8,7 +8,8 @@ import lombok.Setter;
 public class StrategyQuery extends QueryObject {
     private Long themeId;
     private Long destId;
-    private String oderBy="viewnum";
-    private Integer type=null;
-    private Long refid=null;
+    private Long strategyId;
+    private String oderBy = "viewnum";
+    private Integer type = null;
+    private Long refid = null;
 }

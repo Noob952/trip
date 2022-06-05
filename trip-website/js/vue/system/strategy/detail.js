@@ -109,8 +109,10 @@ var vue = new Vue({
         var _this = this;
 
 ajaxGet("strategies/detail",{id:param.id},function (data) {
-            _this.strategy=data.data;
-            _this.content=data.data.content;
+    _this.strategy = data.data;
+    _this.content = data.data.content;
+    _this.queryStatisVo(param.id);
+
 })
         //查明细
         // ajaxGet("/strategies/detail", {id:param.id}, function (data) {
@@ -124,10 +126,10 @@ ajaxGet("strategies/detail",{id:param.id},function (data) {
         // })
         //
         // //攻略评论分页
-        // this.commentPage(1, param.id);
+        this.commentPage(1, param.id);
         //
         // //统计数据
-        // _this.queryStatisVo(param.id);
+        _this.queryStatisVo(param.id);
 
 
     }

@@ -4,33 +4,33 @@ package cn.wolfcode.trip.util;
 import lombok.Getter;
 
 /**
+ * redis key管理
+ */
 
-     *  redis key管理
+@Getter
+public enum RedisKeys {
 
-     */
+    //短信验证码
 
-    @Getter
-    public enum  RedisKeys{
+    VERIFY_CODE("verify_code", 60 * 5L),
+    //攻略的统计数据
+    STRATEGY_STATIS_VO("strategy_statis_vo", -1L),
 
-        //短信验证码
+    //登录token
 
-        VERIFY_CODE("verify_code", 60 * 5L),
+    LOGIN_TOKEN("user_login_token", 60 * 30L);
 
-        //登录token
+    private String prefix;
 
-        LOGIN_TOKEN("user_login_token", 60 * 30L);
+    private Long time;
 
-        private String prefix;
+    private RedisKeys(String prefix, Long time) {
 
-        private Long time;
+        this.prefix = prefix;
 
-        private RedisKeys(String prefix, Long time){
+        this.time = time;
 
-            this.prefix = prefix;
-
-            this.time = time;
-
-        }
+    }
 
         public String join(String ...keys){
 

@@ -11,7 +11,6 @@ import cn.wolfcode.trip.query.TravelQuery;
 import cn.wolfcode.trip.service.ITravelService;
 import cn.wolfcode.trip.service.IUserInfoService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -37,8 +36,8 @@ public class TravelServiceImpl extends ServiceImpl<TravelMapper, Travel> impleme
     private IUserInfoService userInfoService;
 
     @Override
-    public IPage<Travel> queryPage(TravelQuery qo) {
-        IPage<Travel> page = new Page<>(qo.getCurrentPage(), qo.getPageSize());
+    public Page<Travel> queryPage(TravelQuery qo) {
+        Page<Travel> page = new Page<>(qo.getCurrentPage(), qo.getPageSize());
         QueryWrapper<Travel> wrapper = Wrappers.<Travel>query();
         wrapper.eq(qo.getDestId() != null, "dest_id", qo.getDestId());
 

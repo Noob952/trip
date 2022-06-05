@@ -3,7 +3,7 @@ package cn.wolfcode.trip.service;
 import cn.wolfcode.trip.domain.Travel;
 import cn.wolfcode.trip.domain.TravelContent;
 import cn.wolfcode.trip.query.TravelQuery;
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -19,7 +19,7 @@ public interface ITravelService extends IService<Travel> {
      * @param qo
      * @return
      */
-    IPage<Travel> queryPage(TravelQuery qo);
+    Page<Travel> queryPage(TravelQuery qo);
 
     /**
      * 查内容
