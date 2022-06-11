@@ -13,6 +13,7 @@ import cn.wolfcode.trip.service.IStrategyThemeService;
 import cn.wolfcode.trip.util.JsonResult;
 import cn.wolfcode.trip.vo.StrategyStaticsVO;
 import cn.wolfcode.trip.web.annotation.RequireLogin;
+import cn.wolfcode.trip.web.annotation.UserParam;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -91,15 +91,18 @@ public class StrategyController {
 
     @PostMapping("commentAdd")
     @RequireLogin
-    public JsonResult commentAdd(StrategyComment strategyComment, HttpServletRequest request) {
-        String token = request.getHeader("token");
-        UserInfo userInfo = userInfoRedisService.getUserByToken(token);
+    public JsonResult commentAdd(StrategyComment strategyComment, @UserParam UserInfo userInfo) {
+      /*  String token = request.getHeader("token");
+        UserInfo userInfo = userInfoRedisService.getUserByToken(token);*/
+
         strategyComment.setCreateTime(new Date());
         BeanUtils.copyProperties(userInfo, strategyComment);
         strategyComment.setUserId(userInfo.getId());
         strategyComment.setThumbupnum(0);
         strategyComment.setId(null);
         strategyCommentService.save(strategyComment);
+        //评论数量加一
+        strategyStatisticService.incrReplynum(strategyComment.getStrategyId());
         return JsonResult.success();
     }
 
@@ -114,7 +117,7 @@ public class StrategyController {
     ///统计数据回显
     @GetMapping("statisVo")
     public JsonResult statisVo(Long sid) {
-        StrategyStaticsVO staticsVO = strategyStatisticService.statisVo(sid);
+        StrategyStaticsVO staticsVO = strategyStatisticService.statisVO(sid);
 
         return JsonResult.success(staticsVO);
     }
